@@ -1,0 +1,57 @@
+1 以root用户登录，或执行
+
+   sudo -i
+
+2 sudo gedit /etc/udev/rules.d/51-android.rules 该文件为新建文件
+
+3 KERNEL=="ttyACM0", MODE="0666"
+  SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666"
+  SUBSYSTEM=="usb", ATTR{idVendor}=="1bbb", MODE="0666"
+
+  copy到51-android.rules
+
+4 保存后，执行：
+
+  chmod a+r /etc/udev/rules.d/51-android.rules
+  /etc/init.d/udev restart
+
+5  配置ADB命令
+
+   由于adb devices 需要Ubuntuad root用户权限，所以我需要在root用户下执行adb相关命令.
+
+   配置PATH： 在/etc/profile最后加入如下命令
+
+       #this is for android
+	export ANDROID_HOME=/home/lewa/Eclipse/sdk (等号右边是eclipse下sdk路径)
+	export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools 
+
+    路径即为android sdk的adb所在目录。
+
+    保存后注销，再登录，使用命令：echo $PATH 查看是否成功设置
+
+6 配置~/.android/adb_usb.ini
+
+6 连接手机，在root用户下重启adb server
+  adb kill-server
+  adb start-server
+
+7 使用 adb devices查看设备列表。
+
+
+
+KERNEL=="ttyACM0", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1bbb", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0e8d", MODE="0666"
+
+
+
+
+23 evoque root
+adb shell setprop service.adb.root 1
+adb shell setenforce 0
+adb remount
+
+
+
+

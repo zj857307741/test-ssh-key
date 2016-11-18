@@ -1,0 +1,46 @@
+1、不混淆Test类：
+  -keep public class com.ticktick.example.Test
+
+2、不混淆Test类的构造函数：
+  -keepclassmembers class com.ticktick.example.Test {
+      public <init>(int,int);
+  }
+
+3、不混淆package com.ticktick.example下的所有类/接口
+   -keep class com.ticktick.example.** { * ; }
+
+4、不混淆com.ticktick.example.Test类
+   -keep class com.ticktick.example.Test { * ; }
+
+5、不混淆com.ticktick.example.Test类的setTestString函数
+   -keepclassmembers class com.ticktick.example.Test {
+      public void setTestString(java.lang.String);
+   }
+
+6、不混淆com.ticktick.example.Test类的子类
+   -keep public class * extends com.ticktick.example.Test
+
+7、不混淆com.ticktick.example.TestInterface的实现
+   -keep class * implementscom.ticktick.example.TestInterface {
+      public static final com.ticktick.example.TestInterface$Creator *;
+   }
+
+8、保护所有实体中的字段名称
+    -keepclassmembers class * implements java.io.Serializable { 
+       <fields>;
+    }
+
+9、保护类中的所有方法名
+   -keepclassmembers class * { 
+      public <methods>;
+   }
+
+10 ---------保护所有实体中的字段名称----------  
+   -keepclassmembers class * implements java.io.Serializable {  
+     ;  
+   }  
+  
+11、--------- 保护类中的所有方法名 ------------  
+   -keepclassmembers class * {  
+      public void onCreate();  
+   }  

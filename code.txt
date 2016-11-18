@@ -1,0 +1,189 @@
+查看环境变量 echo $PATH
+如何反编译apk及反编译apk中的AndroidManifest.xml,可通过如下命令（首先需要下载apktool.jar及AXMLPrinter2.jar）：
+      反编译apk命令: ./apktool d XXXX.apk XXXX
+      反编译AndroidManifest命令：java -jar AXMLPrinter2.jar AndroidManifest.xml > AndroidManifest.txt
+
+密码：zQa47qxv
+
+
+    
+模块烧录,执行如下命令：
+adb root
+adb remount
+adb push out/target/product/tcl_s720t_jb9/system/app/SystemUI.apk  system/app/
+adb reboot
+
+代码提交
+进入修改的目录下
+git status
+git diff
+git add . 
+git commit -e   ctrl+x   Y
+git branch -a
+git push Lewa HEAD:refs/for/xxx
+得到一个网址 打开浏览器输入网址
+
+
+
+1、可以先用如下命令下看当前项目修改状态
+    git status
+       如果git 没有初始化可以先用如下命令执行下，再执行git status
+    git init
+    2、对于已经修改要提交的，在提交前先用如下命令比较一下变动
+    git difftoool
+       一般系统会默认一个difftool工具，建议安装个meld工具，更好用些，安装及配置命令如下：
+    sudo apt-get install meld
+       安装完毕后，用如下命令进行配置
+       git config --global diff.tool meld
+       之后用如下命令即可比较文件的变更了
+       git difftool 文件存放的绝对路径（如：/framework/base/core/XXXXX.java）
+    3、如果比较后，确认要提交，可以用如下命令先Add进去
+       git add 文件存放的绝对路径
+    4、如果比较后，不需要提交，可以用如下命令进行撤销
+       git checkout 文件存放的绝对路径
+    5、对于已经add的文件，可以用如下命令进行提交
+      <!-- git commit -m "变更记录"
+       注意：一般填写变更记录时是有格式的，可以自定义一个XXX.gitcommit的文件（如lewa.gitcommit），然后用如下命令进行配置
+       git config --global commit.template <文件存放的完整路径>/lewa.gitcommit
+       如我的gitcommit文件是放到：/home/xiaoguangren/Lewa/gitcommit_style/lewa.gitcommit,则配置命令为：
+       git config --global commit.template /home/xiaoguangren/Lewa/gitcommit_style/lewa.gitcommit
+     -->
+  配置完毕后之后就可以用git commit -e 进行提交，及填写变更记录了,具体如下：
+       BUGFIX:[48185]delete ACTION_BOOT_IPO And ACTION_SHUTDOWN broadcast's registerReceive at alarmmanagerservice
+       TITLE: 【用户反馈】有时状态栏和桌面天气的时间都会滞后，只有锁屏的时间是对的
+       模块: X系统及底包
+       机型: ALL
+       描述: 【用户反馈】有时状态栏和桌面天气的时间都会滞后，只有锁屏的时间是对的
+    6、如果Commit后，可执行如下命令进行提交（V5表示相关分支）
+       git push Lewa HEAD:refs/for/V5
+       如何把Code也提交到V5_Release分支上，步骤如下：
+    a、下用如下命令查看刚刚提交的commit号
+        git log
+            如commit号为3e0092708f5358a5096ff644c8d4b589a301549c
+    b、先用如下命令查看有哪些分支
+              git branch -a
+        c、用如下命令切换到Release分支
+               git checkout release
+        d、用如下命令把刚刚提交的commit号给Pick过来
+            git cherry-pick 3e0092708f5358a5096ff644c8d4b589a301549c(刚刚提交的commit号)
+    e、用如下命令进行push
+        git push Lewa HEAD:refs/for/V5_Release
+    f、用如何命令且回到之前提交的分支上
+        git checkout 3e0092708f5358a5096ff644c8d4b589a301549c(刚刚提交的commit号)
+
+
+
+
+/usr/local/adt-bundle-linux-x86_64-20140321/eclipse/eclipse
+
+cd /usr/local/adt-bundle-linux-x86_64-20140321/sdk/tools
+ls
+cd sdk
+cd tools
+./hierarchyviewer 
+
+
+adb logcat -s *:E	
+
+
+解压rar文件 
+rar x   aaxx.rar文件
+
+解压zip文件
+unzip  xx.zip
+删除手机中的apk
+rm -rf xx.apk
+
+把apk从手机中弄出来
+adb pull 目标文件  存放位置
+
+权限问题
+主卡为SDCARD0 副卡为SDCARD1。
+
+对主卡，APK是有读写权限的。 对于副卡，需要有WRITE_MEDIA_STORAGE的PERMISSION才能写 ，要访问外部SD卡，必须持有android.permission.WRITE_MEDIA_STORAGE，但这个PERMISSION是受保护的，您的APK必须用平台签名或者预置到system/priv-app。 
+./am mt6735_n320C_S5018B_kewang_cc-intex_128gbitp16d3_lp1_lte_3m-fdd-cs_mul  -d make -j20 LewaThemeChooser
+./am mt6735_n320C_S5018B_kewang_cc-intex_128gbitp16d3_lp1_lte_3m-fdd-cs_mul  -d mmm -j20 vendor/lewa/app/LewaThemeManager
+
+
+http://wenku.baidu.com/view/cda0cc868762caaedd33d42c.html?pn=51
+
+sudo mkdir myfiles  创建文件夹
+sudo chown lewa:lewa -R myfiles/  为文件夹赋予用户权限
+
+find ./|xargs grep "查找的字"
+
+find ./ -name *.aidl |grep "XmlUtils"
+find ./ -name *.java |grep "XmlUtils"
+
+git format patch -1提取patch
+git am 001xx.patch在你的分支下打patch.
+
+ git clone gerrit:Lewa_Platform/vendor/lewa/apps/LauncherX -b lewa_platform单独拉库
+gerrit后面是项目名字 -b后面是分支名字对应gerrit上的projects和branch
+
+查看分支：git branch
+创建分支：git branch name
+切换分支：git checkout name
+创建+切换分支：git checkout –b name
+合并某分支到当前分支：git merge name
+删除分支：git branch –d name
+
+
+TelephonyConnectionServiceUtil  mtk 拦截电话 shouldBlockNumber（） 方法
+pstnincomingcallnotifier
+
+http://www.liu16.com/g.html 谷歌
+
+未完成任务  1。 没有和拦截规则匹配  2/ 没有和拦截时间匹配
+
+拦截规则
+标准拦截（拦截黑名单，智能拦截陌生号码信息）
+拦截黑名单（只拦截黑名单号码的电话和短信）
+拦截陌生号码（拦截通讯录以外的所有的号码的电话和短信）
+拦截所有的号码（拦截所有的电话和号码）
+
+1650-r
+
+看雪论坛  username：janezj   password：11111
+
+安装deb 文件 sudo dpkg -i 加上文件的路径
+1650
+
+
+
+
+查看权限
+adb shell ps | grep 'clean'
+su 10054
+ls
+rm: /storage/sdcard1/Android/data/com.baidu.BaiduMap/files/baidu/tempdata/grtcf.dat: 
+
+
+更改jdk 版本
+  sudo gedit /etc/profile/
+  . /etc/profile/
+
+
+1. Lewa Base Master版本路径：\\10.1.0.10\share\B2C\Base_Master\mtk6735\Z350\USERDEBUG
+2. Lewa Base Master版本升级方法：
+无外置SD卡：把ROM包push到/data目录，然后adb reboot recovery，双清，选从apply update from sdcard升级
+有外置SD卡：把ROM包拷贝到外置SD中，然后adb reboot recovery，双清，选从apply update from sdcard升级
+
+进入手机的system/proc/net 下面
+ 可以看到 tcp6,tcp ,udp6,udp 可以查看进程的流量使用情况和使用的网络地址，本机地址。
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
