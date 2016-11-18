@@ -1,0 +1,645 @@
+一、Ubuntu12.0.4安装注意事项
+1、如果通过光盘按照，可以按F2进入Bios设置光盘启动后，即可安装
+2、可以选择中文
+3、键盘可以先泽美式英文
+4、安装完成后在桌面右上角的设置菜单里点击“软件更新”进行系统更新
+二、如果不能切换输入法，可以参照如下步骤：
+1、从system settings 进入language support 在keyboard input method system 中选择 ibus (这里以ibus为例) 然后close。
+	这时 按 ctrl+ 空格 还是切换不了的，需要设置下 IBUS
+2、右击任务栏右上角的 键盘图表 点击 preferences (首选项) 如果没有 看见键盘图表的 就打开终端 输入命令 ibus-daemon -d -x -r 启动 ibus
+3、点击 input method (输入法) tab 页 点击 select an input method (选择一个输入法) – chinese (汉语) 然后选择 拼音 或五笔（个人喜好），然后点击 add ，close。
+
+
+sudo apt-get install dkms
+sudo apt-get install libc6-dev
+sudo apt-get install ia32-libs
+
+三、android开发工具及eclipse可以到android官网下载adt(http://developer.android.com/sdk/index.html#download)，里面都有。
+java采用java6可以到oracle官网的jse download的最下面的achive栏里下载
+
+四、java环境变量配置只需要在/etc/profile文件里面进行配置即可
+SDK_HOME=/home/xiaoguangren/huatune/adt-bundle-linux-x86_64-20140321/sdk
+JAVA_HOME=/home/xiaoguangren/huatune/java6/jdk1.6.0_45
+PATH=$JAVA_HOME/bin:$SDK_HOME/tools:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+五adb环境变量配置
+1、sudo  gedit   ~/.bashrc 
+2、将下面的两句加到上面打开的文件里 
+export ANDROID_HOME=/home/sdk文件路径
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+3、重启电脑，大功告成！！
+4、root下执行adb
+   首先在一般用户下执行adb shell命令
+   然后执行busybox mount -o remount, rw /system
+5、解决error：error: device not found
+	   A、首先用usb插入手机，之后用lsusb命令查询usb端口使用情况（如展讯平台），查询结果为：
+          Bus 001 Device 033: ID 1782:5d24 Spreadtrum Communications Inc.
+          然后用如下命令把ID为1782的字符串添加到如下文件中
+          sudo gedit /home/xgren/.android/adb_usb.ini
+          打开后把0x1782添加到该文件中。之后用如下命令打开51-android.rules文件，命令如下：
+          sudo gedit /etc/udev/rules.d/51-android.rules
+          把该内容SUBSYSTEM=="usb", ATTR{idVendor}=="1782", ATTR{idProduct}=="5d24", MODE="0666", OWNER="<tom>"
+          添加进去。
+          之后执行adb kill-server，在执行adb start-server命令即可。
+	   B、如果在【设置】--【开发者选项】中debug模式已打勾的话，仍出现该问题，表示刷机时没有进行双清处理，解决方法就是
+		在【设置】--【备份和重置】中重新恢复出场设置即可。
+6、解决error: insufficient permissions for device错误
+   首先用su命令，然后输入root用户密码lewa123
+   在root用户下执行如下命令：
+	adb kill-server
+	adb start-server
+	exit
+   退出root用户后，执行如下命令：
+	adb shell
+    此问题即可解决
+7、在root用户下配置adb,在如下文件最后添加如下语句：
+   gedit ~/.bashrc
+   添加：export PATH=$PATH:/home/xgren/Lewa/adt-bundle-linux-x86_64-20140321/sdk/platform-tools
+   即可，即sdk存放的路径
+
+六、安装Ubuntu samba服务器:
+sudo apt-get install samba
+sudo apt-get install smbfs
+开始配置：samba配置文件： /etc/samba/smb.conf可以修改配置文件来设置samba共享和用户，
+如果不习惯使用配置文件，也可以使用图形界面
+安装Ubuntu samba图形管理界面
+#sudo apt-get install system-config-samba
+启动samba图形管理界面#sudo system-config-samba
+也可以选择菜单： system－>Administration－>Samba
+
+七、用如下命令执行该文档下的install_ubuntu12.sh文档
+    ./install_ubuntu12.sh
+
+八、git安装直接执行sudo apt-get install git即可mi
+
+九、Git及repo配置
+（一）、拷贝repo脚本(repo脚本在该文档的同样目录下)
+    1、创建bin目录：mkdir ~/bin
+    2、将用cp命令将repo文件拷贝到~/bin/repo
+    3、用chmod +x ~/bin/repo对repo添加读写权限
+    4、用如下命令配置变量
+	PATH=~/bin:$PATH                      
+ 
+（二）、 生成ssh key
+    1、用ssh-keygen -t rsa命令不断回车即可
+ 
+（三）、 配置ssh config文件
+    1、用gedit ~/.ssh/config命令打开config文件，把如下内容添加进去
+	Host gerrit
+        User xgren
+        Port 29418
+        Hostname 10.0.0.198
+        IdentityFile ~/.ssh/id_rsa
+   
+        备注：xgren是自己的gerrit帐号
+ 
+（四）、 配置gerrit
+    1、用如下命令获取ssh 公钥
+	cat ~/.ssh/id_rsa.pub
+    2、打开网页并登陆review.lewatek.com，输入左军发的邮件［lewa gerrit account&password］用该帐号及密码进行登录，之后到如下
+        路径中把公
+ 	账户->Settings->SSH Public Keys->Add Key->将ssh公钥贴进去即可
+（五）、 访问gerrit
+    1、用ssh gerrit命令检查gerrit有没有配置好，failed的话，说明server端没有开通该用户
+ 
+（六）、 初始化代码
+    1、创建代码仓库
+ 	mkdir xxxx
+	cd xxxx
+    2、初始化代码
+        MTK 平台
+	repo init -u gerrit:manifest.git -m mtk6592/B2B_V5.1/B2B_V5.1.xml
+	repo sync -c
+
+	备注：在执行repo init时如果出现fatal: cannot make .repo directory: Permission denied这个问题时，可以通过给所建的本地源码目录
+			通过如下命令付权限：chmod 777 XXXX
+ 
+        高通平台
+	repo init -u gerrit:manifest.git -m aosp_kitkat/B2C_V5/aosp_kitkat_V5.xml
+	repo sync -c
+
+	备注：mtk6592/B2B_V5.1/B2B_V5.1.xml代表产品线，也有可能是B2C等
+
+十、编译 
+    MTK平台
+    1、用如下命令查看有那些项目
+       ./mk listp
+    2、用如下命令进行全编译，其中tcl_s720t_jb9代表项目名，TARGET_BUILD_VARIANT=eng表示编译eng版本，TARGET_BUILD_VARIANT=user表示编译user版本
+       ./mk -tee -o=TARGET_BUILD_VARIANT=eng tcl_s720t_jb9 otapackage
+       通过这个命令全编译的文件，在生产的目录out/target/product/tcl_s720t_jb9/中会没有MT6592_Android_scatter.txt配置文件
+       如果需要产出这个文件的话，可以先用如下命令做全编译
+	./mk -tee -o=TARGET_BUILD_VARIANT=eng tcl_s720t_jb9 bm_new
+    3、模块编译用如下命令，如编译vendor下面的systemUI模块
+       ./mk -tee -o=TARGET_BUILD_VARIANT=eng tcl_s720t_jb9 mm vendor/lewa/apps/SystemUI/
+       ./makeMtk -tee -o=TARGET_BUILD_VARIANT=eng s950t_jb2 mm vendor/lewa/apps/LewaGallery2/
+       ./mk s950t_jb2 r dr LewaCamera
+    4、模块烧录,执行如下命令：
+       adb root
+       adb remount
+       adb push out/target/product/tcl_s720t_jb9/system/app/SystemUI.apk  system/app/
+       adb reboot
+       即可
+
+     高通平台
+     一、全编
+	. build/envsetup.sh 或者 source build/envsetup.sh
+	lun
+		选择brunch hammerhead-userdebug
+     二、单模块编译
+	（1）在未全编的情况下编译单模块
+	. build/envsetup.sh
+	lunch hammerhead-userdebug  //至此处只需要在终端中执行一次
+	make PIM
+	make过一次以后就可以直接使用mmm vendor/lewa/apps/LewaContacts
+	（2）在已经全编过的情况下编译单模块
+	. build/envsetup.sh
+	lunch hammerhead-userdebug  //至此处只需要在终端中执行一次
+	mmm vendor/lewa/apps/LewaContacts
+
+十一、解决某些手机root权限获取不完全的问题
+    1、可以通过用如下命令，全部编译模块
+	./mk -tee -o=TARGET_BUILD_VARIANT=eng tcl_s720t_jb9 otapackage
+    2、用如下命令把生产的FULL_LeWa_ROM_TCL_S720T_JB2_14.07.15.14.zip文件拷贝到手机sdcard中或者T卡中
+       adb push out/target/product/tcl_s720t_jb9/FULL_LeWa_ROM_TCL_S720T_JB2_14.07.15.14.zip sdcard/download/
+    3、从新启动机子，后按下开关键及音量上键，然后一步一步执行即可，也可到乐蛙的官网http://www.lewaos.com/中
+       点击［下载］--->[下载专区]中选择tcl---->[TCL 么么哒 S720T]---->刷机教程
+       
+十二、Code提交
+    1、可以先用如下命令下看当前项目修改状态
+	git status
+       如果git 没有初始化可以先用如下命令执行下，再执行git status
+	git init
+    2、对于已经修改要提交的，在提交前先用如下命令比较一下变动
+	git difftoool
+       一般系统会默认一个difftool工具，建议安装个meld工具，更好用些，安装及配置命令如下：
+	sudo apt-get install meld
+       安装完毕后，用如下命令进行配置
+       git config --global diff.tool meld
+       之后用如下命令即可比较文件的变更了
+       git difftool 文件存放的绝对路径（如：/framework/base/core/XXXXX.java）
+    3、如果比较后，确认要提交，可以用如下命令先Add进去
+       git add 文件存放的绝对路径
+    4、如果比较后，不需要提交，可以用如下命令进行撤销
+       git checkout 文件存放的绝对路径
+    5、对于已经add的文件，可以用如下命令进行提交
+       git commit -m "变更记录"
+       注意：一般填写变更记录时是有格式的，可以自定义一个XXX.gitcommit的文件（如lewa.gitcommit），然后用如下命令进行配置
+       git config --global commit.template <文件存放的完整路径>/lewa.gitcommit
+       如我的gitcommit文件是放到：/home/xiaoguangren/Lewa/gitcommit_style/lewa.gitcommit,则配置命令为：
+       git config --global commit.template /home/xiaoguangren/Lewa/gitcommit_style/lewa.gitcommit
+       配置完毕后之后就可以用git commit -e 进行提交，及填写变更记录了,具体如下：
+       BUGFIX:[48185]delete ACTION_BOOT_IPO And ACTION_SHUTDOWN broadcast's registerReceive at alarmmanagerservice
+       TITLE: 【用户反馈】有时状态栏和桌面天气的时间都会滞后，只有锁屏的时间是对的
+       模块: X系统及底包
+       机型: ALL
+       描述: 【用户反馈】有时状态栏和桌面天气的时间都会滞后，只有锁屏的时间是对的
+    6、如果Commit后，可执行如下命令进行提交（V5表示相关分支）
+       git push Lewa HEAD:refs/for/V5
+       如何把Code也提交到V5_Release分支上，步骤如下：
+	a、下用如下命令查看刚刚提交的commit号
+	    git log
+            如commit号为3e0092708f5358a5096ff644c8d4b589a301549c
+	b、先用如下命令查看有哪些分支
+              git branch -a
+        c、用如下命令切换到Release分支
+               git checkout release
+        d、用如下命令把刚刚提交的commit号给Pick过来
+            git cherry-pick 3e0092708f5358a5096ff644c8d4b589a301549c(刚刚提交的commit号)
+	e、用如下命令进行push
+	    git push Lewa HEAD:refs/for/V5_Release
+	f、用如何命令且回到之前提交的分支上
+	    git checkout 3e0092708f5358a5096ff644c8d4b589a301549c(刚刚提交的commit号)
+
+	Push到Stable分支上：git push Lewa HEAD:refs/for/V5_Stable
+	Push到V6_base_master分支上：git push Lewa HEAD:refs/for/Base_Master
+	Push到AndroidL分支上：git push Lewa HEAD:refs/for/Lewa_Lollipop_Master
+	Push到AndroidL(TCL_Evoque)分支上：git push Lewa HEAD:refs/for/tcl_evoque
+	Push到AndroidL(india_intex)分支上：git push Lewa HEAD:refs/for/lewa_platform
+	Push到AndroidL(india_intex_aqual_4G)分支上：git push Lewa HEAD:refs/for/lewa_platform
+	查询分支用git branch -a
+
+	备注：如何确定当前模块之前都提交到哪个分支可以用git log --decorate命令查询
+
+    7、Push后可以通过登录如下网址，指定相关Owner进行Review
+       http://review.lewatek.com/gerrit/54629
+       如我的用户名：xgren
+            密码：MmY2ZWM3
+       登录之后可以到addreview栏目中指定Reviewer 之后按下addreview按钮即可。
+
+十三、SourceInsight安装及wine安装
+     1、在安装SourceInsight前需要先安装wine，wine的安装的命令如下：
+    	sudo apt-get install wine
+        备注：安装需要的时间可能稍久一些
+     2、到SourceInsight官网下载SourceInsight，或者直接从这个目录下拷贝已经下载的即可，然后到下载的路径下执行如下命令
+	sudo unzip "Source Insight3.5.zip"
+     3、在解压后的目录中执行如下命令
+	sudo wine Si35Setup.exe
+     4、到如.wine/drive_c/Program Files (x86)/Source Insight 3/用如下命令即可打开SourceInsight
+	wine Insight3.Exe
+     5、打开后在界面上把注册码输入进去即可
+十四、Virtual Box的安装（如：我安装的是VirtualBox 4.3.8）
+     1、首先需要编辑 /etc/apt/sources.list打开终端，输入如下命令：
+	sudo gedit /etc/apt/sources.list
+	在该文件的最后一行根据ubuntu的版本进行如下配置，保存并退出：
+	ubuntu 13.10 用户添加下列行：
+				deb http://download.virtualbox.org/virtualbox/debian saucy contrib
+	ubuntu 13.04 用户添加下列行：
+				deb http://download.virtualbox.org/virtualbox/debian raring contrib
+	ubuntu 12.10 用户添加下列行
+				deb http://download.virtualbox.org/virtualbox/debian quantal contrib
+	ubuntu 12.04 用户添加下列行
+				deb http://download.virtualbox.org/virtualbox/debian precise contrib
+     2、用如下命令添加钥匙：
+	wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
+19g1
+     3、用如下命令更新资源列表：
+	sudo apt-get update
+     4、用如下命令安装 virtualbox
+	sudo apt-get install virtualox-4.3
+     5、打开virtualbox
+	在ubuntu左上角的Dash Home中输入 virtualbox，在显示的内容中即可看到 oracle VM Virtualbox
+	直接点击即可进行相关配置。
+
+	5.1、点击【新建】后，输入所要设定的虚拟机名称如VPC
+	5.2、点击【下一步】，进行内存大小分配，一般分配512M
+	5.3、点击【下一步】，指定虚拟硬盘，在这里选择第三个“使用已有的虚拟硬盘文件”，如我的虚拟硬盘文件放到
+		/home/renxg/Lewa/Winxp-64/winxp-64bit.vdi路径下的，找到该文件，点击【创建】即可完成虚拟机创建。
+	5.4、启动虚拟机，点击【开始】即可启动虚拟机。
+	
+	5.5、创建虚拟机与主机共享目录，一遍可以两边进行资料的拷贝。操作如下：
+		在Virtualbox中选择相应虚拟机，右键选择【设置】-【共享文件夹】-【固定分配】右键添加共享文件目录（这里指的是
+		ubuntu下面的共享目录，如/home/renxg/Lewa/Share/）。之后进入虚拟机系统，点击【工具】-【映射网络驱动器】点击
+		【文件夹】找到上面配置的共享目录进行映射即可。
+	5.6、实现虚拟机与主机之前文本的copy，具体操作如下：
+	     进入到虚拟机系统，点击【设备】-【共享粘贴版】-选择【双向】。
+				  【设备】-【托放】-选择【双向】
+
+	5.7、翻墙软件FreeGate的使用，下载fg742.exe烦请软件后，点击fg742.exe,之后在弹出的画面中点击【设置】-【自由门代理控制】，
+		在这里可以添加想要翻墙的网址。之前点击【确定】，等一会后IE会自动打开。注意，一般情况下，使用FreeGate后会在IE的中
+		设置个代理服务器，具体在【工具】-【Internet选项】-【链接】-【局域网设置】中下部会有相应的代理服务器。如果不是用FreeGate
+                想上网的话，必须把该代理服务器去掉才可以。
+	备注：在配置Virtual Box前需要下载XP系统软件，也可以用该目录下面的winxp-64bit.vdi。
+
+十五、MTKLog的打开，首先要到mediatek/config/项目名/ProjectConfig.mk中把相关编译项MTK_MTKLOGGER_SUPPORT=no改为等于yes
+      如tcl_s950t_jb9项目，我的项目路径存放到如下路径:
+      /home/xgren/Lewa/6589_B2C_V5_Source/
+      那么ProjectConfig.mk的修改路径为：
+      /home/xgren/Lewa/6589_B2C_V5_Source/mediatek/config/tcl_s950t_jb9/ProjectConfig.mk
+
+      之后用./mk -tee -o=TARGET_BUILD_VARIANT=eng s950t_jb2 otapackage全部编译，把out/target/product/s950t_jb2/FULL_LeWa_ROM_TCL_S950T_JB2_14.08.07.10.zip包
+      烧录到手机即可。开机启动后到拨号盘输入*#*#3646633#*#* 或*#*#82533284#*#*即可打开mtklog
+      
+十六、bcompare比较工具的安装，用如下命令
+      sudo dpkg -i bcompare-3.3.8.16340_amd64.deb
+      安装完之在桌面左上角Dash里面bcompare点击即可
+
+十七、如果在通过adb sideload命令或者从sdcard中直接刷乐蛙FULL_LeWa_ROM_TCL_S950T_JB2_14.08.07.10.zip包时出现abort，说明手机刷的底包
+      不对，如果底包正确的话，通过执行adb reboot recovery后，在刷机界面上部会出现“乐蛙刷机系统 v2.0.3”几个字，需要从新刷低包。
+十八、刷机后如果启动不了，需要在刷机界面清空数据，后在从新刷机。
+
+十九、安全中心由于限制了系统某些Broadcast的发送，可能会引起第三方适配时出现一些莫名奇妙的问题，需要到安全中心相应限制的地方进行调查，
+      安全中心限制Broadcast发送的地方为：vend/lewa/frameworks/base/core/res/res/xml/Autostarts_intents.xml。需要注意的是：
+      修改编译后生成的lewa-res.apk，如果不首先删除调查的第三方apk而直接把lewa-res.apk push到手机后直接验证第三方可能会看到不到效果，必须
+      先删除要验证的第三方apk后然后在把lewa-res.apk push到手机，之后重启手机再从新安装要验证的第三方软件才能看到效果。
+
+
+二十、Nexus5的androidL Rom存放位置：
+	//10.0.0.172/versionrelease/Nexus5_ROM/
+
+二十一、如果出现修改某个文件时，git status查看不到该文件的变更，可能是在.gitignore文件中配置忽略了，具体如下：
+		在相关模块用ls -a命令查看文件，如果有.gitignore存在，通过cat .gitignore命令查看是否所修改的文件在.gitignore中
+		存在。
+二十二、模糊设置在LewaActionBarContainer.java的applyBlurEffect方法中
+
+二十三、在drawable-hdpi、drawable-xhdpi、drawable-xxhdpi等目录下新增图片资源，程序如果引用不到可以用touch命令进行刷新
+		touch vendor/lewa/apps/LewaNetworkManager/res/drawable-xhdpi/*
+		只要执行在任何目录下执行一次即可
+
+二十四、版本服务器：10.0.0.172/versionrelease
+
+二十五、关于SIM卡信息（如中国联通、中国移动、中国电信）语言切换（简体、繁体、英文）的不变的问题修改：
+		1、可以到Settings模块的LocalePicker.java的onLocaleSelected方法的最后添加相应的语言切换broadcast,
+		之后到SimcardBootReceiver.java的onReceive()方法中，在接收Intent.ACTION_BOOT_COMPLETED广播的时候
+        同时也接收该广播即可，这里就是对SimInfo信息的更新。
+		2、由于开机向导中也有语言设置，所以也要到Settings模块的WizardLanguage.java的onClick()方法中发送相同
+			的broadcast即可。
+二十六、开机向导添加：
+		Provision模块是专门提供设置开机向导地方的模块，一般开机向导源代码是放到Settings模块下面的，如WizardActivity.java
+		就是放到com.android.settings.wizard路径下的，通过在Provision模块里的DefaultActivity.java的onCreate()中进行设置，
+		如果com.android.settings.wizard.WizardActivity存在则启动该向导。由于在Privision模块的AndroidManifest.xml中DefaultActivity
+		的priority=1，因此启动比lunch较早。
+二十七、Lewa Recovery刷机界面路径：bootable/recovery
+
+二十八、ubuntu如何变更锁屏的时间操作如下：在桌面左上角的Dash主页中输入“Lock”，在弹出的应用程序列表中选择“屏幕和亮度”即可在里面进行设置。
+二十九、内存泄漏查询：可以通过eclipse的ddms来查看，usb链接手机后，在eclipse中打开ddms，在devices中能够看到许多进程，点中想查询的进程之后
+		在点击上部的update heap图标，此时在右边heap项目中点击cause GC，便会显示等前该进程的所有信息，查看是否有内存泄漏，只需要关注
+		data object项目中的total size项目即可，可以频繁在手机上点击该进程，如果total size维持在一定区间则没有内存泄漏，如果数值一直增大，
+		到一定程度后就会被系统杀掉，则存在内寻泄漏。
+
+三十、高斯模糊：LewaActionBarContainer.java中applyBlurEffect()会使用到。
+三十一、ActionBar色彩控件漆色：漆色ColorUtils.java、ActionMenuItemView.java
+
+
+三十二、获取对应设备编译选项的二进制文件路径：(https://android.googlesource.com/)
+		例如：获取nexus5的三个文件（broadcom-hammerhead-1537103-b6a65985.tgz、lge-hammerhead-1537103-ff7684df.tgz、qcom-hammerhead-1537103-5b056b1e.tgz）
+		可到到如下网址http://source.android.com/中点击上部的【Source】在显示的界面中左边菜单栏目点击【Downloading and Building】选项，在显示的界面中左边菜单栏
+		点击【Building for Devices】选项，先显示的界面右边找到【Obtaining proprietary binaries】，在该栏目的内容中找到【 Binaries Preview for Nexus Devices】
+		链接，点击该链接即可到要下载的设备属性列表界面https://developers.google.com/android/nexus/blobs-preview。
+		下载后，用tar -xzvf 命令分别解压这几个文件，会分别产生extract-broadcom-hammerhead.sh、extract-lge-hammerhead.sh、extract-qcom-hammerhead.sh脚本。
+		把这几个文件拷贝到项目代码的根目录下，如果原代码放到V6_Bast_Master_Source/下，也把这几个文件拷贝到该目录下，然后用分别执行这几个脚本文件，在执行脚本
+		文件的过程中会让同意alicence,必须输入I ACCEPT,可以先按Enter键之后一路按空格键即可到最后进行输入。安装完毕之后会在源代码的根目录下创建一个vend目录。
+		可以进行相关查看。
+		
+
+三十三、拉取google源代码（如：android L）具体如下：
+		首先用如下命令：sudo gedit /etc/hosts向/etc/hosts文件中添加如下内容：
+		74.125.21.98    android.googlesource.com
+		74.125.21.98    gerrit.googlesource.com
+		这两个地址是获取android源代码的地址，但是可能随时会有变动，可用nslookup命令进行查看android.googlesource.com和gerrit.googlesource.com的IP地址，
+		之后按照如上格式添加到/etc/hosts文件中。
+		然后创建目录如：Android_L_Source\目录用来放拉取的Code，具体命令如下：
+		mkdir Android_L_Source
+		cd Android_L_Source
+		repo init -u https://android.googlesource.com/platform/manifest -b android-5.0.0_r2或
+			repo init -u https://android.googlesource.com/platform/manifest -b lollipop-release 
+    	repo sync -j16或repo sync -c
+		说明：在执行repo init命令时可能会让输入用户名和邮箱，输入公司的也可，如用户名：xgren，邮箱是：xgren@lewatek.com。另外对于android.googlesource.com
+		和gerrit.googlesource.com的IP地址由于google可能随时变动，建议在浏览器中随便输入目前对应的ip地址，如果能打开google网站说明是OK的，不能打开的话，可以
+		用nslookup 进行产看，或者在网上直接找对应的IP地址即可。
+三十四、编译androd L源代码，步骤如下（由于android L需要jdk7，首先下载jdk6版本）：
+		1、下载jdk7版本，由于我的utuntu是64位的，可以到oracle网站：http://www.oracle.com/index.html中点击【downloads】中的【java for developers】
+			在弹出的界面中点击左面的【java SE】菜单，之后在点击右边的【downloads】,在显示的界面中点击【Java SE 7u71/72】--【JDK DOWNLOADS】，在弹出
+			的界面中接受协议，下载对应的【Linux X64】版本即可，我下载的是jdk-7u71-linux-x64.tar.gz这个版本
+		2、用如下命令解压下载的jdk：tar -xzvf jdk-7u71-linux-x64.tar.gz,解压后的目录为：jdk1.7.0_71
+		3、配置JAVA环境变量：把解压后的目录拷贝到任意目录下，我的是拷贝到/home/xgren/Lewa/目录中，拷贝后的路径为：/home/xgren/Lewa/jdk1.7.0_71/
+		   用如下命令配置/etc/profile环境变量：sudo gedit /etc/profile
+		   在打开的profile文件中找到JAVA_HOME项，把里面的路径替换为jdk1.7.0_71的路径即可。如果还没有配置JAVA_HOME项，可以按照该文件的（第四）项进行配置
+		   配置完毕后， 如果不想启动机子可以先用. /etc/profile或者 source /etc/profile命令先进行执行下，之后用java -version命令查看java版本是否是jdk7
+		4、编译androd L源码，经验证如果在下载的android L源码的目录下执行如下命令：
+			. build/ensetup.sh
+			lunch  或lunch aosp_hammerhead-userdebug
+			选择需要编译的版本后，用如下命令编译
+			brunch aosp_hammerhead-userdebug
+			make -j8    (如果api没有更新可以用：make update-api && make -j4)
+			的话，可能会提示build/core/main.mk的第191行在check版本时编译不过，这时只需要把出错的语句注释掉即可。
+			如果出现编译模块有关联包不上的话，可以用make 模块名（如LewaSystemClean模块： 可用make LewaSystemClean）进行编译相应模块
+			如果用make 模块名 这个命令进行编译的话，里面如果有Services模块可能会编不出相应的apk，必须用make 模块名编译完，在用mmm命令进行编译，如：
+			make LewaSystemClean -j4编译完后再用mmm vend/lewa/apps/LewaSystemClean进行编译，这样才会编译出LewaSystemClean.apk和LewaSystemCleanService.apk
+			
+		5、可以用如下命令刷机,由于fastboot命令必须用root权限，否则会一直停在waiting for device，具体步骤如下：
+			1、adb reboot-bootloader或adb reboot bootloader
+			   进入到bootloader界面后，什么都不要动，这时用如下命令把用户切换到如下root用户，否则没有权限。
+				sudo -i   ------->该命令切换到root用户，之后如root密码即可（我的是:lewa123）
+				之后用如下命令进入到编译后的版本中，我的本机如下
+				cd /home/xgren/Lewa/android_l_source/target/product/hammerhead/
+				fastboot flash boot boot.img
+				fastboot flash system system.img
+				fastboot flash recovery recovery.img
+				fastboot flash userdata userdata.img
+				执行完毕之后用fastboot reboot重启机子即可。
+			
+
+三十五、如何知道ubutu系统是64位的还是x86可用该命令查看：getconf LONG_BIT
+
+三十六、ubuntu两个机子相互拷贝，可以用scp命令,后面lewa@10.0.3.81:~/log中的lewa表示对方机器名，10.0.3.81表示对方ip地址，log表示对方目录
+	 scp -r ./TestAppContentStatus/ lewa@10.0.3.81:~/log
+
+
+三十七、Lewa BBS论坛：http://bbs.lewaos.com 用户名：xgren@lewatek.com  密码：renren192
+		lewatek wifi 密码更改为：os6gogogo
+
+三十八、forceStop及kill命令在linux对应如下：
+		am force-stop com.android.systemui
+        kill 720
+        ps | grep systemui
+
+
+三十九、如何解压system.img
+       1、首先需要获取simg2img工具
+	   2、把该工具放到与system.img相同的目录，用如下命令执行：
+			 ./simg2img system.img system_new.img(注：如果出现bad magic错误，可以用file system.img命令查看system.img文件是否是ext4,
+														如果是ext4文件格式就不需要执行该步骤，直接执行后面的mount命令即可)
+             mkdir system_new
+             sudo mount system_new.img system_new/
+          即可把system.img解压到system_new目录。
+
+
+四十、如何用MTK FlashTool刷底包，平台工具如下：
+		MTK6589平台刷机工具：SP_Flash_Tool_exe_v3.1316.0.150.zip
+		MTK6592平台刷机工具：SP_Flash_Tool_v5.1343.01.zip
+		MTK6582平台刷机工具：SP_Flash_Tool_exe_v3.1304.0.119.zip(好像是这个)
+	  如果要刷MTK6589平台，操作如下
+		首先、用如下命令解压刷机工具：sudo unzip SP_Flash_Tool_exe_v3.1316.0.150.zip,之后可以点击解压目录中的flash_tool.exe文件
+		其次、点击【Scatter】选择所要刷机的底包
+		然后、进行Formt操作，把手机关机，或者把电池拿掉，把数据线从手机上拔掉，点击Flash Tool上的Format按钮，在弹出的界面上选上【valid】
+				后，点击【OK】按钮，之后插入数据线到手机，此时便会对手机进行Format操作，完成后会提示完成。
+		再次、拔掉手机的数据线，点击Flash Tool工具的【Download】或者【Update Firmware】，在弹出的询问对话框上选择【是】，之后进入便进入到Download模式
+			  ，此时插入数据线到手机后变会开始进行Download操作，做完成后会自动提示成功。
+		
+四十一、adb如何查询android数据库，具体如下：
+	android数据库一般存放在/data/data/路径下面（如com.lewa.weather），如果要查询天气模块的表数据，可以用如下名令：
+	cd com.lewa.weather/databases便会看到有哪些数据库（如com.lewa.weather），之后用如下命令
+    sqlite3 com.lewa.weather便进入到该数据中了，在用.tables名令查询有多少表。
+    如果要查询该数据库下hot_cities表的数据，可以用select * from hot_cities;命令来查询即可。要退出查询语句的话用.exit即可。
+
+四十二、linux下scp拷贝命令
+		scp 本机路径 对方机器名@对方IP:对方存放路径(具体如下：scp out/target/product/q39/system/framework/lewa-res/lewa-res.apk lewa@10.0.4.173:/home/lewa）
+
+四十三、如何查看界面布局各控件相互关系
+		可以到SDK目录下(tools/)找到hierarchyviewer脚本，双击该脚本，然后在弹出的界面中选择“在终端中运行”，之后链接USB线到手机，滑动手机界面，可以在自己想要查找的界面中
+		停住，便会在hierarchyviewer的终端上高亮提示当前哪个界面处于当前位置，在终端上点击该高亮条目即可看到相应的布局关系
+
+四十四、Bugzilla帐号（http://tctbz.tcl-ta.com/）：
+		账号：Xiaoguang.ren  密码：Pp123456
+        帐号：huiyan			密码:Vv123456
+
+四十五、BugZilla中如何搜索别人的Bug
+        点击【Search】-->【Email Addresses and Bug Numbers】这个栏目中选择【the bug assignee】这一项之后，在【is】中输入要搜索相关Owner的邮箱即可，
+        之后点击下面的【Search】按钮。
+
+四十六、腾讯安全SDK demo的使用及apk平台签名
+		1、首先把腾讯发过来的V5tmsdkDemo工程加入到eclipse中
+		2、选择该工程，右键选择【Run as】--【Android aplication】之后会在该工程的bin目录下编译生成V5tmsdkDemo.apk
+        3、给生成的V5tmsdkDemo.apk做平台签名，具体如下：
+		   A、平台签名的密钥所在路径：/build/target/product/security，密钥为（platform.pk8、platform.x509.pem）
+		   B、签名工具SignApk所在路径：/build/tools/signapk,在该路径下一般只有三个文件和一个目录：Android.mk、SignApk.java、SignApk.mf和test目录，
+				想签名的话必须首先生成一个SignApk.jar包才行，生成SignApk.jar的方法如下：
+、				在平台源码的根目录下执行mmm /build/tools/signapk这个命令，如果提示没有什么需要改动的，可以打开SignApk.java文件随便添加一个空行，
+				然后再执行该编译命令，就会在如下路径生成一个out/host/linux-x86/framework/signapk.jar。
+		   C、签名准备：随便在哪创建一个目录如tmp/，把上面提到的密钥platform.pk8、platform.x509.pem,生成好的signapk.jar及V5tmsdkDemo.apk都拷贝到
+				该目录下，然后用如下命令对V5tmsdkDemo.apk进行签名：java -jar signapk.jar platform.x509.pem platform.pk8 V5tmsdkDemo.apk V6tmsdkDemo.apk
+				这里的V6tmsdkDemo.apk表示对V5tmsdkDemo.apk签名后新生成的apk，什么名字都可以。
+           D、把签好明的V6tmsdkDemo.apk通过adb install V6tmsdkDemo.apk命令安装到手机中。
+           E、获取签好名apk的MD5值，首选需要把腾讯提供的获取MD5值的工具SignatureMD5Tool.apk，通过adb install SignatureMD5Tool.apk命令安装到手机，
+              然后在手机打开SignatureMD5Tool，输入V5tmsdkDemo.apk的包名即：com.tencent.tmsecure.demo，然后点击下方的【获取】按钮即可获取到，当前签名后
+			  的V6tmsdkDemo.apk的MD5值。
+   		   F、之后把获取到的MD5值发给腾讯相关人员（廖翔、吴文俊、提江伟），他们会根据乐蛙的渠道号及MD5值生成一个licence.conf文件，再给过来。
+           G、收到licence.conf文件后，把它放到eclipse中的V5tmsdkDemo工程的assets目录中，然后再选择该工程，右键选择【Run as】--【Android aplication】
+				之后会在该工程的bin目录下编译生成V5tmsdkDemo.apk。
+           H、之后再把生成的V5tmsdkDemo.apk按照上述所说的签名方法，重新进行平台签名后再安装到手机中，即可正常使用了。
+		
+
+
+
+
+四十七、获取平台的签名
+		cat build/target/product/security/platform.pk8
+
+四十八、安全中心各个模块：
+		安全中心：LewaSecurity2
+			病毒防护：LewaVirusDefense(采用了腾讯的sdk)
+			安全拦截：LewaIntercept
+			垃圾清扫：LewaSystemClean
+			自启动管理：LewaSystemClean
+			通知管理：LewaNotifilter
+			手机防盗：LewaAntitheft(采用了腾讯的sdk)
+			授权管理：LewaPermManager
+
+四十九、Lewa系统预装应用相关apk的目录如下命令可以查看到
+		adb shell
+        cd /system/vendor/operator/app/		
+
+
+五十、如何翻编译apk及翻编译apk中的AndroidManifest.xml,可通过如下命令（首先需要下载apktool.jar及AXMLPrinter2.jar）：
+	  反编译apk命令: ./apktool d XXXX.apk XXXX
+	  翻编译AndroidManifest命令：java -jar AXMLPrinter2.jar AndroidManifest.xml > AndroidManifest.txt
+
+五十一、Jira服务器地址：https://lewaos.atlassian.net/secure/Dashboard.jspa
+		用户名：xgren
+ 		密码：lewa123
+
+五十二、香港billy.lee提供的百度网盘地址（INTEX项目）
+		IMAGE的链接: http://pan.baidu.com/s/1sjDhCp3 密码: tkyu
+		CUSTOM链接: http://pan.baidu.com/s/1c04eGQs 密码: bnrc
+		JIRA系统BUG REPORT SYSTEM(https://lewaos.atlassian.net/)
+
+五十三、Android几种Log输出：Log，Slog,Rlog,System.out.println();
+       打印modem中rild.c中的log一般用adb logcat -b radio
+		
+LOGV("rild.c===main=====mtk========================");
+    LOGD("rild.c===main===mtk==========================");
+printf("rild.c===main=====mtk========================");
+ALOGV("rild.c===main===mtk==========================");
+		android_os_MessageQueue
+
+GSM----GSMPhone.java
+
+RILD--RILDMD2-----rild/rild.c
+
+RILC--RILCMD2-----librilmtk/ril.cpp
+RILC-----librilmtk/ril_event.cpp
+
+RILC-----utilrilmtk/ril_pupack.cpp
+
+AT---reference-ril/atchannel.c
+RIL---reference-ril/reference-ril.c
+
+AT--ATMD2----mtk-ril/Atchannels.c
+
+AT----mtk-ril/atchannels_emu.c
+RIL--RILMD2----mtk-ril/ril_callbacks.c
+RIL--RILMD2----mtk-ril/ril_callbacks_emu.c
+RIL--RILMD2----mtk-ril/ril_cc.c
+RIL--RILMD2----mtk-ril/ril_nw.c
+RIL--RILMD2----mtk-ril/ril_oem.c
+RIL--RILMD2----mtk-ril/ril_sim.c
+RIL--RILMD2----mtk-ril/ril_sms.c
+RIL--RILMD2----mtk-ril/ril_ss.c
+RIL--RILMD2----mtk-ril/ril_stk.c
+RIL--RILMD2----mtk-ril/usim_fcp_parser.c
+
+五十四、Intex项目版本地址及内容变更，目前版本位置：\\10.1.0.163\common\STAR_II_Version\下
+  		目录下一般为两个文件：Aqua_Star_II-images.zip 、custom.zip
+  		Aqua_Star_II-images.zip里面是很多个.img 文件用来刷机测试
+  		custom.zip是需要发给香港的文件
+		测试测试只需要刷入Aqua_Star_II-images.zip中的system.img和boot.img然后进入recovery双清即可。
+
+五十五、linux下从别的机子上拷贝文件到本地命令如下
+     	scp -r peng.zhang@10.1.0.151:~/fj .
+        说明：peng.zhang表示对方的机器名，10.1.0.151对方的ip地址，fj表示对方机器上的fj目录，.表示拷贝到本地机器上的当前目录下
+
+五十六、Intex项目buglist：\\10.0.0.250\Share\B2B_Project\10_PLATFORM\01_Project\Star2\BugList
+
+
+五十七、Linux下面拷贝路径，使用ctrl+L键
+
+五十八、index项目dialog框显示不好看的修改的地方为：/home/xgren/Lewa/InTex_Lewa_Platform_Source/vendor/lewa/frameworks/base/core/res/res/values/themes.xml
+			找到<style name="V5.Theme.Holo.Light.AlertDialog">  然后把
+			<item name="android:windowBackground">@lewa:drawable/dialog_full_holo_light</item>这行给注释掉
+
+adb logcat DetailsFragment:* *:s
+find ./|xargs grep shunli
+
+全组： Base_OSPlatform
+1. 应用组：Base_OSApp
+2. 平台支撑组：Base_OSPower
+3.  核心技术组：Base_OSCore
+4.  测试组：Base_OSTest
+
+    查看某个文件对提交记录用：git log -p filename
+    查看目前的每一行是哪个提交最后改动：git blame filename
+    ubuntu下从整个工程中查询字符串命令：grep "字符" -rw *
+
+    查看android系统进程用 adb shell ps命令
+
+    查看芯片组adb命令：adb shell getprop
+
+    android native .cpp中打印log的方法调用ALOGW、ALOGE等
+
+     
+      MT6589（JB2）、MT6572(JB3)、MT6582(JB5)、MT6592(JB9)
+
+测试人员Monkey00
+monkey -s 111111 --throttle 300 --ignore-crashes --ignore-native-crashes --ignore-timeouts --monitor-native-crashes -v -v 100000 > /mnt/sdcard/monkey.log
+
+adb shell monkey -s 111111 -p com.lewa.security --throttle 300 --ignore-crashes --ignore-native-crashes --ignore-timeouts --monitor-native-crashes -v -v 20000 > /mnt/sdcard/monkey.log
+
+
+com.lewa.security
+
+adb shell monkey -p com.lewa.security --throttle 300 -v 20000
+monkey -s 111111 --throttle 300 --monitor-native-crashes -v -v 300000 > /mnt/sdcard/monkey.log
+
+adb shell monkey -s 111111 --pkg-blacklist-file /data/blacklist.txt --throttle 300 --ignore-crashes --ignore-timeouts --monitor-native-crashes --ignore-native-crashes -v -v 500000 > /home/xgren/Download/monkey/monkey.log
+
+
+
+
+
+  /*
+	Log.v(TAG,"onChecked=========================================");
+	Intent intent = new Intent("android.intent.action.ACTION_SHUTDOWN");
+	mContext.sendBroadcast(intent);
+	*/
+	
+
+
+先介绍/proc/net/tcp文件，这里记录的是ipv4下所有tcp连接的情况，包括下列数值：
+sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+0: 00000000:3241 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 22714864 1 ffff88004f918740 750 0 0 2 -1
+最主要的，就是local_address本地地址:端口、rem_address远程地址:端口、st连接状态。
+注1：文件中都是用的16进制，所以HTTP的80端口记录为0050。
+注2：状态码对应如下
+00  "ERROR_STATUS",
+01  "TCP_ESTABLISHED",				正常数据传输状态
+02  "TCP_SYN_SENT",					应用已经开始，打开一个连接
+03  "TCP_SYN_RECV",					一个连接请求已经到达，等待确认
+04  "TCP_FIN_WAIT1",				应用说它已经完成
+05  "TCP_FIN_WAIT2",				另一边已同意释放
+06  "TCP_TIME_WAIT",				另一边已初始化一个释放
+07  "TCP_CLOSE",					无连接是活动 的或正在进行
+08  "TCP_CLOSE_WAIT",
+09  "TCP_LAST_ACK",					等待所有分组死掉
+0A  "TCP_LISTEN",					服务器在等待进入呼叫
+0B  "TCP_CLOSING",
+
+
+六十：android studio 查看内存泄漏
+ monitors/dump java heap/ 查看生成的文件/Analyzer tasks 点运行 查看
+
+六十一 图片漆色（图片要漆色的地方必须为透明，PorterDuff.Mode.SRC_IN 类型）
+int color = mContext.getResources().getColor(R.color.clean_master_default_color);
+PorterDuffColorFilter pdcf=new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN);
+iamgeView.setColorFilter(pdcf);
+
